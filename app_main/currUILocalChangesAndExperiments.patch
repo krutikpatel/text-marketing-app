@@ -1,0 +1,97 @@
+Index: app_ui/app-services/authentication.service.js
+===================================================================
+--- app_ui/app-services/authentication.service.js	(revision 136)
++++ app_ui/app-services/authentication.service.js	(working copy)
+@@ -62,7 +62,8 @@
+                     'firstName': formData.firstName,
+                     'lastName' : formData.lastName,
+                     'email' : formData.email,
+-                    'password' : formData.password
++                    'password' : formData.password,
++                    'country' : formData.country
+                 })
+                 .success(function (response) {
+                     // login successful if there's a token in the response
+Index: app_ui/app-services/configFactory.js
+===================================================================
+--- app_ui/app-services/configFactory.js	(revision 136)
++++ app_ui/app-services/configFactory.js	(working copy)
+@@ -12,9 +12,9 @@
+         var factory = {};
+         
+         //if (process.env.NODE_ENV !== 'production') //Note: process is not defined for angular app. its only meant for nodejs app
+-        //    factory.baseAppUrl = 'https://textraction.herokuapp.com/';//for cloud
++            factory.baseAppUrl = 'https://textraction.herokuapp.com/';//for cloud
+         //else    
+-            factory.baseAppUrl = 'http://localhost:3000/';//for local machine
++        //    factory.baseAppUrl = 'http://localhost:3000/';//for local machine
+         
+         //factory.baseAppUrl = 'https://d018456e.ngrok.io/' ; //ngrok
+         
+Index: app_ui/app.js
+===================================================================
+--- app_ui/app.js	(revision 136)
++++ app_ui/app.js	(working copy)
+@@ -66,6 +66,12 @@
+                 templateUrl: 'app_ui/checkout/checkoutcustom.view.html',
+                 controller: 'CheckoutController',
+                 controllerAs: 'vm'
++            })
++            .state('home.changesubscription', {
++                url: '/changesubscription',
++                templateUrl: 'app_ui/checkout/changesubscription.view.html',
++                controller: 'CheckoutController',
++                controllerAs: 'vm'    
+         });
+ 
+         //401 interceptor
+Index: app_ui/home/home.view.html
+===================================================================
+--- app_ui/home/home.view.html	(revision 136)
++++ app_ui/home/home.view.html	(working copy)
+@@ -59,14 +59,15 @@
+ 
+       <!-- Sidebar Menu -->
+       <ul class="sidebar-menu">
+-        <li class="header">HEADER</li>
++        <li><a></a></li>
+         <!-- Optionally, you can add icons to the links -->
+-        <li class="active"><a href="#"><i class="fa fa-link"></i> <span>Overview</span></a></li>
++        <li class="active"><a href="#">Overview</a></li>
+         <li><a ui-sref=".groups">Groups</a></li>
+         <li><a ui-sref=".uploadcontacts">Upload Contacts</a></li>
+         <li><a ui-sref=".creategroup">Create group</a></li>
+         <li><a ui-sref=".sendmessage">Send Messages</a></li>
+         <li><a ui-sref=".checkout">Checkout</a></li>
++        <li><a ui-sref=".changesubscription">Membership and Billing</a></li>
+       </ul>
+       <!-- /.sidebar-menu -->
+     </section>
+Index: app_ui/register/register.controller.js
+===================================================================
+--- app_ui/register/register.controller.js	(revision 136)
++++ app_ui/register/register.controller.js	(working copy)
+@@ -28,7 +28,8 @@
+                 firstName : vm.firstName,
+                 lastName : vm.lastName,
+                 email : vm.email,
+-                password : vm.password
++                password : vm.password,
++                country : 'US'
+             }
+             
+             AuthenticationService.Register(formData, function (result) {
+Index: index.html
+===================================================================
+--- index.html	(revision 136)
++++ index.html	(working copy)
+@@ -33,7 +33,9 @@
+ 	  <link rel="stylesheet" href="app_ui/app-dist/css/skins/skin-black.min.css">
+ 	  
+ 	<!-- End Admin LTE CSS -->
++	<!-- App specific additional styles -->
+ 	
++	
+ 	<!-- Admin LTE JS -->
+ 	<!-- jQuery 2.2.3 -->
+ 	<script src="app_ui/app-jquery/jQuery/jquery-2.2.3.min.js"></script>

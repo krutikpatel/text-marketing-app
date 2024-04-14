@@ -1,0 +1,13 @@
+{
+    "uname" : "meetkrutik",
+    "pwd" : "swaminarayan",
+
+    "PLAN_ID_PLAN1" : "Test1",
+    "PLAN_ID_PLAN30" : "Test30",
+
+    "heroku_db_uname" : "meetkrutik",
+    "heroku_db_pw" : "textkrutik",
+
+    "heroku_db_uname2" : "heroku_8b0ctp8b",
+    "heroku_db_pw2" : "meetkrutik1"
+}
