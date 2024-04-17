@@ -1,3 +1,6 @@
+//fetching env variables first thing to do
+require("./config/env.config");
+
 var express = require('express');
 var app = express();
 var mongoose = require('mongoose');
@@ -34,9 +37,10 @@ var cronScheduler = require('./helpers/cronScheduler')
 //======= Swagger Setup =================================//
 var hostString = '';
 if (process.env.NODE_ENV == 'production')
-	hostString = 'https://textraction.herokuapp.com';
+	//hostString = 'https://textraction.herokuapp.com';
+  hostString= 'localhost:80';
 else
-	hostString= 'localhost:3000';
+	hostString= 'localhost:8080';//AWS needs 80
 
 // swagger definition
 var swaggerDefinition = {
@@ -76,6 +80,7 @@ var passport	= require('passport');
 //log
 var logger = require('./logging/logModule');
 logger.info('Jay Swaminarayan, First log ! :D ');
+logger.info('<<<>>>> config.TWILIO_ACCOUNT_SID='+config.TWILIO_ACCOUNT_SID);
 
 //app.use('/assets', express.static(__dirname + '/public'));
 app.use(express.static(__dirname + "/")); //Note: usually it will be /public --> thats where all ui will be hosted
@@ -135,6 +140,10 @@ app.use(router);
 //middleware experiment
 //app.use('/forgot',geoip.findLocation);
 
+logger.info('Jay Swaminarayan, First log ! :D ');
+logger.info('creating controllers');
+logger.info('env var KRUTIK='+config.KRUTIK);
+
 //
 var validator = require('validator');
 var d = '2017-04-21T06:54:34.995Z';
@@ -173,8 +182,7 @@ if(now > d2){ //This comaprision works !
 //
 //
 //Controllers
-logger.info('Jay Swaminarayan, First log ! :D ');
-logger.info('creating controllers');
+
 
 signupController(app);
 loginController(app);
