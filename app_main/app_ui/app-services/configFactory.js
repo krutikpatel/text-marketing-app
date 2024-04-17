@@ -14,10 +14,10 @@
         //if (process.env.NODE_ENV !== 'production') //Note: process is not defined for angular app. its only meant for nodejs app
         //    factory.baseAppUrl = 'https://textraction.herokuapp.com/';//for cloud
         //
-        if (process.env.BACKENDURL !== undefined)
-            factory.baseAppUrl = BACKENDURL
-        else    
-            factory.baseAppUrl = 'http://localhost:80/';//for local machine
+        //if (process.env.BACKENDURL !== undefined) // UI code does not have access to process.env
+        //    factory.baseAppUrl = BACKENDURL
+        //else    
+            factory.baseAppUrl = 'http://smsalb1-1172469992.us-east-1.elb.amazonaws.com/';//URL must end with slash / and port 80 for local machine
         
         //factory.baseAppUrl = 'https://d018456e.ngrok.io/' ; //ngrok
         
