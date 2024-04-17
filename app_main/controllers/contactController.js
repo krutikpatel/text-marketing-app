@@ -12,6 +12,7 @@ var userHelper = require('../helpers/userHelper');
 var util = require('util');
 
 var sendMessagesAsync = util.promisify(TwilioClient.sendMessages);
+const sendSqsMessage = require('../awshelpers/sqshelper');
 
 module.exports = function(app){
 
@@ -178,7 +179,7 @@ module.exports = function(app){
      *              
     */
     //send by groupName
-    app.post('/smsapi/users/:userId/groups/:groupName/sendsms', async function(req,res) {    
+    app.post('/smsapi/users/:userId/groups/:groupName/sendsmsOrig', async function(req,res) {    
         
         var userId = req.params.userId;
         var group = req.params.groupName;
@@ -265,4 +266,27 @@ module.exports = function(app){
         }
     });
 
+    app.post('/smsapi/users/:userId/groups/:groupName/sendsms', async function(req,res) {    
+        
+        var userId = req.params.userId;
+        var group = req.params.groupName;
+        var includeName = req.body.includeName;
+        
+        if(!includeName){
+            includeName = false;
+        }
+
+        logger.info('[contactsController][post:/smsapi/users/:userId/groups/:groupName/sendsms] userId = ' + userId + ' and groupName = '+req.params.groupName);
+
+        //send sqs msg
+        const queueURL = 'https://sqs.us-east-1.amazonaws.com/886642041635/sendtestmsgq';
+        const messageBody = { req: req.params };
+        await sendSqsMessage(queueURL, messageBody);
+        console.log('Message sent to the SQS queue');
+
+        res.status(200).send({
+            success: true, 
+            message: 'done sending messages'
+        });
+    });
 }
