@@ -1,5 +1,5 @@
 var braintree = require("braintree");
-var braintreeHelper = require('./braintreeHelper');
+// var braintreeHelper = require('./braintreeHelper');
 var braintreeGetHelper = require('./braintreeGetHelper');
 var logger = require('../logging/logModule');
 var config = require('../config/config');
@@ -9,6 +9,7 @@ var activityLogHelper = require('../helpers/activityLogHelper');
 var self = module.exports = {
 
     getForwardableRemainingMeesagesFromUser: async function(userId){
+        return 0;
         try{
             const user = await Users.findOne({id: userId});
             if(user && user.balance.billingCycleEndDate >= Date.now())
@@ -23,7 +24,7 @@ var self = module.exports = {
                 return 0;
             }
 
-        }catch(err){
+        } catch(err){
             logger.info('[userBalanceHelper:getForwardableRemainingMeesagesFromUser] There was DB error while finding user. err= '+err.message + ' \nStack = '+err.stack);
             return 0;
         }

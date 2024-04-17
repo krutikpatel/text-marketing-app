@@ -11,11 +11,18 @@ var self = module.exports = {
         privateKey: config.BT_PRIVATE_KEY //"078c6132a0016f7d20347f30caeadeae"
     }),
 */
+/*
     gateway : new braintree.BraintreeGateway({
         environment: braintree.Environment.Sandbox,
         merchantId: config.BT_MERCHANT_ID,
         publicKey: config.BT_PUBLIC_KEY,
         privateKey: config.BT_PRIVATE_KEY
     }),
-
+*/
+    gateway : new braintree.BraintreeGateway({
+        environment:  braintree.Environment.Sandbox,
+        merchantId:   '7x7xxscvxbfdkbpb',
+        publicKey:    '3dypgc75r5mx5dfs',
+        privateKey:   '078c6132a0016f7d20347f30caeadeae'
+    })
 };
