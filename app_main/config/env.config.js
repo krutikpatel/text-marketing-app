@@ -1,3 +1,5 @@
+
+//ref: https://blog.devgenius.io/integrate-aws-secret-manager-in-your-nodejs-application-c167115eec3e
 var AWS = require('aws-sdk'),
     region = "us-east-1",
     secret,
