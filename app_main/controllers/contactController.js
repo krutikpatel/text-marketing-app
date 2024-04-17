@@ -280,7 +280,10 @@ module.exports = function(app){
 
         //send sqs msg
         const queueURL = 'https://sqs.us-east-1.amazonaws.com/886642041635/sendtestmsgq';
-        const messageBody = { req: req.params };
+        const messageBody = { params: req.params,
+            message: req.body.message,
+            includeName: includeName
+         };
         await sendSqsMessage(queueURL, messageBody);
         console.log('Message sent to the SQS queue');
 
