@@ -7,11 +7,11 @@
     **Features:**
     
     - User login/registration
-    - Upload contacts (customer phone numbers) vis csv file
+    - Upload contacts (customer phone numbers) via csv file
     - Create different groups based on marketing and promotion to run
     - Send message to particular group (of numbers). Text message sending is empowered using Twilio messaging API
-    - Billing and subscription management vis Braintree payment API
+    - Billing and subscription management using Braintree payments API
     
 - **Architecture**
     
-    The backend is transformed into scalable system using AWS services like ECS, SQS and Lambda.
+    The backend is transformed into scalable system using AWS services like ECS, SQS and Lambda and ALB.
