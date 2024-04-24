@@ -1,0 +1,170 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "The template used to create an ECS Service from the ECS Console.",
+    "Parameters": {
+      "ECSClusterName": {
+        "Type": "String",
+        "Default": "smsappcluster"
+      },
+      "ECSServiceName": {
+        "Type": "String",
+        "Default": "smsapp123"
+      },
+      "SecurityGroupIDs": {
+        "Type": "CommaDelimitedList",
+        "Default": "sg-0c8dc745ade83fd30"
+      },
+      "SubnetIDs": {
+        "Type": "CommaDelimitedList",
+        "Default": "subnet-09dfa46be5ac7da55,subnet-0bb541fb4a4fc4f18"
+      },
+      "VpcID": {
+        "Type": "String",
+        "Default": "vpc-0bf00d46522bb1f0e"
+      },
+      "LoadBalancerName": {
+        "Type": "String",
+        "Default": "sms123alb"
+      }
+    },
+    "Resources": {
+      "ECSService": {
+        "Type": "AWS::ECS::Service",
+        "Properties": {
+          "Cluster": "smsappcluster",
+          "TaskDefinition": "arn:aws:ecs:us-east-1:886642041635:task-definition/smsapptask:12",
+          "LaunchType": "FARGATE",
+          "ServiceName": "smsapp123",
+          "SchedulingStrategy": "REPLICA",
+          "DesiredCount": 1,
+          "LoadBalancers": [
+            {
+              "ContainerName": "smsapp",
+              "ContainerPort": 80,
+              "LoadBalancerName": {
+                "Ref": "AWS::NoValue"
+              },
+              "TargetGroupArn": {
+                "Ref": "TargetGroup"
+              }
+            }
+          ],
+          "HealthCheckGracePeriodSeconds": "120",
+          "NetworkConfiguration": {
+            "AwsvpcConfiguration": {
+              "AssignPublicIp": "ENABLED",
+              "SecurityGroups": {
+                "Ref": "SecurityGroupIDs"
+              },
+              "Subnets": {
+                "Ref": "SubnetIDs"
+              }
+            }
+          },
+          "PlatformVersion": "LATEST",
+          "DeploymentConfiguration": {
+            "MaximumPercent": 200,
+            "MinimumHealthyPercent": 100,
+            "DeploymentCircuitBreaker": {
+              "Enable": true,
+              "Rollback": true
+            }
+          },
+          "DeploymentController": {
+            "Type": "ECS"
+          },
+          "ServiceConnectConfiguration": {
+            "Enabled": false
+          },
+          "Tags": [],
+          "EnableECSManagedTags": true
+        },
+        "DependsOn": [
+          "Listener"
+        ]
+      },
+      "LoadBalancer": {
+        "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+        "Properties": {
+          "Type": "application",
+          "Name": "sms123alb",
+          "SecurityGroups": {
+            "Ref": "SecurityGroupIDs"
+          },
+          "Subnets": {
+            "Ref": "SubnetIDs"
+          }
+        }
+      },
+      "TargetGroup": {
+        "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+        "Properties": {
+          "HealthCheckPath": "/",
+          "Name": "ecs-smsapp-smsapp123",
+          "Port": 80,
+          "Protocol": "HTTP",
+          "TargetType": "ip",
+          "HealthCheckProtocol": "HTTP",
+          "VpcId": {
+            "Ref": "VpcID"
+          },
+          "TargetGroupAttributes": [
+            {
+              "Key": "deregistration_delay.timeout_seconds",
+              "Value": "600"
+            }
+          ]
+        }
+      },
+      "Listener": {
+        "Type": "AWS::ElasticLoadBalancingV2::Listener",
+        "Properties": {
+          "DefaultActions": [
+            {
+              "Type": "forward",
+              "TargetGroupArn": {
+                "Ref": "TargetGroup"
+              }
+            }
+          ],
+          "LoadBalancerArn": {
+            "Ref": "LoadBalancer"
+          },
+          "Port": 80,
+          "Protocol": "HTTP"
+        }
+      }
+    },
+    "Outputs": {
+      "ClusterName": {
+        "Description": "The cluster used to create the service.",
+        "Value": {
+          "Ref": "ECSClusterName"
+        }
+      },
+      "ECSService": {
+        "Description": "The created service.",
+        "Value": {
+          "Ref": "ECSService"
+        }
+      },
+      "LoadBalancer": {
+        "Description": "The created load balancer.",
+        "Value": {
+          "Ref": "LoadBalancer"
+        }
+      },
+      "Listener": {
+        "Description": "The created listener.",
+        "Value": {
+          "Ref": "Listener"
+        }
+      },
+      "TargetGroup": {
+        "Description": "The created target group.",
+        "Value": {
+          "Ref": "TargetGroup"
+        }
+      }
+    }
+}

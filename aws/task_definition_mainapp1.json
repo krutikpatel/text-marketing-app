@@ -1,0 +1,47 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Resources": {
+        "MyTaskDefinition": {
+            "Type": "AWS::ECS::TaskDefinition",
+            "Properties": {
+            "Family": "smsapptask-cldfrnt",
+            "ExecutionRoleArn": "arn:aws:iam::886642041635:role/ecsTaskExecutionRole",
+            "NetworkMode": "awsvpc",
+            "RequiresCompatibilities": [
+                "FARGATE"
+            ],
+            "Cpu": "256",
+            "Memory": "0.5GB",
+            "ContainerDefinitions": [
+                {
+                "Name": "smsapp",
+                "Image": "registry.hub.docker.com/meetkrutik/smsapp:latest",
+                "PortMappings": [
+                    {
+                    "Name": "smsapp-80-tcp",
+                    "ContainerPort": 80,
+                    "HostPort": 80,
+                    "Protocol": "tcp",
+                    "AppProtocol": "http"
+                    },
+                    {
+                    "Name": "smsapp-3000-tcp",
+                    "ContainerPort": 3000,
+                    "HostPort": 3000,
+                    "Protocol": "tcp",
+                    "AppProtocol": "http"
+                    }
+                ],
+                "Environment": [
+                    {
+                    "Name": "NODE_ENV",
+                    "Value": "production"
+                    }
+                ]
+                }
+            ]
+            }
+        }
+    }
+    
+}
