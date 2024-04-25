@@ -13,5 +13,6 @@
     - Billing and subscription management using Braintree payments API
     
 - **Architecture**
-    
+
+    ![Alt text](images/smsAppArchDiagram.drawio.png)
     The backend is transformed into scalable system using AWS services like ECS, SQS and Lambda and ALB.
