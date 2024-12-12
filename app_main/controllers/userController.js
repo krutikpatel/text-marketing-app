@@ -11,6 +11,111 @@ module.exports = function(app){
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true}));
 
+    // Secure endpoint
+    //req.user = {"user":{"value":"krutikpatelextra@gmail.com"},"iat":1715920622,"exp":1715924222}
+    app.get('/smsapp/memberinfo', jwtHelper.verifyTokenFromHeader, async function(req,res) {
+        console.log('[usercontroller][get:smsapp/memberinfo] req.user = '+ JSON.stringify(req.user));
+        var decoded = req.user.user;
+        const email = decoded.value;
+        console.log('[usercontroller][get:smsapp/memberinfo] email = '+ email);
+
+        //console.log('[usercontroller][get:smsapp/memberinfo] req.token = ', req.token);
+/*
+        // Middleware to verify JWT
+        const token = req.headers['authorization'];
+        if (!token) return res.status(401).send('Access denied. No token provided.');
+    
+        try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        res.send(decoded);
+        } catch (ex) {
+        res.status(400).send('Invalid token.');
+        }
+*/
+        console.log('[usercontroller][get:smsapp/memberinfo] passed middleware validation');
+        try{
+            const user = await Users.find({ email: decoded.value});
+            if (!user) {
+                logger.error('[usercontroller][get:smsapp/memberinfo] user not found in DB');
+                return res.status(401).send({
+                    success: false,
+                    message: 'Authentication failed. User not found.'
+                });
+            }else {
+                logger.info('[usercontroller][get:smsapp/memberinfo] user found in DB, email = '+user[0].email);
+                                           //knote: value returned by mongoose find method is array, so even if there is only one obj found, to access that  object, user array anootation
+                
+                //res.json({success: true, msg: 'Welcome in the member area ' + user.email + '!'});//browser does not get email, sees "unknowen" instead
+                //res.send(user);
+                var retUser = user[0]; //not sending sensitive details
+                retUser.password = '';
+                retUser.resetPasswordToken = '';
+                return res.status(200).send({
+                    success: true,
+                    message: 'user found',
+                    user : retUser,
+                });
+                    
+            }
+        }catch(err){
+            logger.error('[usercontroller][get:smsapp/memberinfo] Error = '+err.message + ' \nStack = '+err.stack);
+            res.status(500).send({
+                success: false,
+                message: 'There was problem with getting info from db'
+            });
+        }
+    });
+
+    //google oauth2 flow
+    app.get('abc/smsapp/memberinfo',async function(req,res) {
+        console.log('[usercontroller][get:smsapp/memberinfo] req.body = '+ JSON.stringify(req.body));
+        console.log('[usercontroller][get:smsapp/memberinfo] req.token = ', req.token);
+
+        var decoded = jwtHelper.getDataAfterVerifyingJwtToken(req.token);//decoded._doc.email
+        if (decoded) {
+            //var decoded = jwt.verify(token, config.secret);
+            logger.info('[usercontroller][get:smsapp/memberinfo] decoded email: '+ decoded.email);
+
+            try{
+                const user = await Users.find({ email: decoded.email});
+                if (!user) {
+                    logger.error('[usercontroller][get:smsapp/memberinfo] user not found in DB');
+                    return res.status(401).send({
+                        success: false,
+                        message: 'Authentication failed. User not found.'
+                    });
+                }else {
+                    logger.info('[usercontroller][get:smsapp/memberinfo] user found in DB, email = '+user[0].email);
+                                               //knote: value returned by mongoose find method is array, so even if there is only one obj found, to access that  object, user array anootation
+                    
+                    //res.json({success: true, msg: 'Welcome in the member area ' + user.email + '!'});//browser does not get email, sees "unknowen" instead
+                    //res.send(user);
+                    var retUser = user[0]; //not sending sensitive details
+                    retUser.password = '';
+                    retUser.resetPasswordToken = '';
+                    return res.status(200).send({
+                        success: true,
+                        message: 'user found',
+                        user : retUser,
+                    });
+                        
+                }
+            }catch(err){
+                logger.error('[usercontroller][get:smsapp/memberinfo] Error = '+err.message + ' \nStack = '+err.stack);
+                res.status(500).send({
+                    success: false,
+                    message: 'There was problem with getting info from db'
+                });
+            }
+        }
+        else {
+            return res.status(401).send({
+                success: false,
+                message: 'No token provided or wrong token or token expired'
+            });
+        }
+    });
+
     /**
      * @swagger
      * definitions:
@@ -88,7 +193,8 @@ module.exports = function(app){
      */
     //1 - get by uname
     // app.get('/smsapp/memberinfo',passport.authenticate('jwt', { session: false}), async function(req,res) {  //krutiknew this does not work
-    app.get('/smsapp/memberinfo',async function(req,res) {
+    //legacy flow
+    app.get('/smsapp/memberinfoLegacy',async function(req,res) {
         var decoded = jwtHelper.getDataAfterVerifyingJwtToken(req.headers);//decoded._doc.email
         if (decoded) {
             //var decoded = jwt.verify(token, config.secret);

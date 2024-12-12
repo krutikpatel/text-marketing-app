@@ -1,0 +1,47 @@
+<div class="col-lg-6">
+    <form name="uploadContactsForm" class="form-horizontal" ng-submit="vm.uploadContactsFile(uploadContactsForm.$valid)" novalidate>
+        <fieldset>
+
+        <div class="form-group" ng-class="{ 'has-error' : uploadContactsForm.fileToUpload.$invalid && vm.uploadContactsFormSubmitted }">
+            <label for="file" class="col-lg-3 control-label">File: *</label>
+            <div class="col-lg-9">
+                <input type="file" name="fileToUpload" class="form-control" id="file" kng-Filemodel="vm.fileToSend" required>
+                <p ng-show="uploadContactsForm.fileToUpload.$invalid && vm.uploadContactsFormSubmitted " class="help-block">File selection  is required.</p>
+            </div>
+        </div>
+        <div class="form-group" ng-class="{ 'has-error' : uploadContactsForm.groupName.$invalid && vm.uploadContactsFormSubmitted }">
+        <label for="colIndex" class="col-lg-3 control-label">Contacts Column Index in file: *</label>
+        <div class="col-lg-9">
+            <input type="number" name="colIndex" id="colIndex" ng-model="vm.colIndex" min="0" max="99" required>
+            <span class="help-block">(Contacts Cclumn number/index in the file you want to upload, beginning count with 0.)</span>
+            <p ng-show="uploadContactsForm.groupName.$invalid && vm.uploadContactsFormSubmitted " class="help-block">Column number is required. Range 0-99</p>
+        </div>
+        </div>
+        <div class="form-group" ng-class="{ 'has-error' : uploadContactsForm.groupName.$invalid && vm.uploadContactsFormSubmitted }">
+            <label for="groupselect" class="col-lg-3 control-label">Group Name: *</label>
+            <div class="col-lg-9">
+                <select name="groupName" class="form-control" id="groupselect" ng-model="vm.selectedGroup" ng-options="x.groupName for x in groups" required>
+                </select>
+                <p ng-show="uploadContactsForm.groupName.$invalid && vm.uploadContactsFormSubmitted " class="help-block">Group selection  is required.</p>
+            </div>
+        </div>
+        <div class="form-group">
+          <div class="col-lg-9 col-lg-offset-3">
+            <button type="submit" class="btn btn-primary">upload file</button>
+          </div>
+        </div>
+    
+        <div ng-show="vm.showAlert" class="alert alert-{{vm.alertType}} alert-dismissable col-lg-9 col-lg-offset-3">
+            <button type="button" class="close" ng-click="vm.showAlert = false" aria-hidden="true">
+                &times;
+            </button>
+            <strong>{{vm.alertType}}</strong> {{vm.resUploadContacts}}
+        </div>
+            
+        </fieldset>
+    </form>
+    
+    <!-- <p>{{vm.filread.name}}</p> -->
+    
+    
+</div>

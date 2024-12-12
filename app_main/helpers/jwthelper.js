@@ -45,4 +45,43 @@ module.exports = {
         }
     },
     
+    //use this as common middleware for all rest api calls
+    verifyTokenFromHeader: function (req, res, next) {
+        const authHeader = req.headers['authorization'];
+        logger.info('[verifyTokenFromHeader] verifyToken invoked, authHeader = '+authHeader);
+
+        if (!authHeader) {
+          return res.status(401).send('Access denied from middleware. No token provided.');
+        }
+      
+        const authHeadertoken = authHeader.split(' ')[1]; // Extract the token from the Bearer scheme
+      
+        try {
+          const decoded = jwt.verify(authHeadertoken, config.secret);
+          req.user = decoded; // Add the decoded token to the request object
+          next(); // Call the next middleware function
+        } catch (ex) {
+          res.status(400).send('Invalid token.');
+        }
+    },
+
+    verifyTokenFromCookie: function (req, res, next) {
+        logger.info('verifyToken invoked, req.cookies = '+req.cookies);
+
+        //get info from cookie
+        const token = req.cookies['token'];
+        logger.info('verifyToken invoked, token = '+token);
+
+        if (!token) {
+          return res.status(401).send('Access denied from middleware. No token provided.');
+        }
+      
+        try {
+          const decoded = jwt.verify(token, config.secret);
+          req.user = decoded; // Add the decoded token to the request object for use in next function or conotroller
+          next(); // Call the next middleware function
+        } catch (ex) {
+          res.status(400).send('Invalid token.');
+        }
+    }
 };

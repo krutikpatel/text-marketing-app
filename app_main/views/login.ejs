@@ -1,0 +1,60 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <style>
+	.google-btn {
+    display: inline-flex;
+    background-color: white;
+    color: #444;
+    width: 180px;
+    border-radius: 5px;
+    border: thin solid #888;
+    box-shadow: 1px 1px 1px grey;
+    white-space: nowrap;
+}
+
+.google-icon-wrapper {
+    position: relative;
+    margin-right: 5px;
+    padding-bottom: 2px;
+}
+
+.google-icon {
+    position: absolute;
+    border: 0.5px solid #ccc;
+    border-radius: 50%;
+    height: 30px;
+    width: 30px;
+    margin-left: 5px;
+    margin-top: 1px;
+}
+
+.btn-text {
+    font-size: 14px;
+    letter-spacing: 0.2px;
+    padding: 15px 0 15px 0;
+    font-family: 'Roboto', sans-serif;
+}
+  </style>
+</head>
+<script>
+	// clear localStorage
+	localStorage.clear();
+  </script>
+<body>
+  <h1>Kaashiba Solutions</h1>
+  <a href="/login/federated/google">Login with Google</a>
+  
+	<br></br>
+  <a href="/login/federated/google" class="google-btn">
+    <div class="google-icon-wrapper">
+        <img class="google-icon" src="https://developers.google.com/identity/images/g-logo.png" alt="Google sign-in"/>
+    </div>
+    <p class="btn-text"><b>Sign in with Google</b></p>
+</a>
+</body>
+</html>

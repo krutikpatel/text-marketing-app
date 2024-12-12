@@ -9,6 +9,8 @@ var AWS = require('aws-sdk'),
 var client = new AWS.SecretsManager({
     region: region
 });
+//imp to set for prod
+if (process.env.NODE_ENV === 'production') {
 client.getSecretValue({SecretId: secretName}, function(err, data) {
     if (err) {
         if (err.code === 'DecryptionFailureException')
@@ -54,3 +56,4 @@ client.getSecretValue({SecretId: secretName}, function(err, data) {
     // console log in case of error
     console.log(err);
 });
+}

@@ -2,15 +2,19 @@
 require("./config/env.config");
 
 var express = require('express');
+var session = require('express-session');
+var passport	= require('passport');
+var csrf = require('csurf');
 var app = express();
 var mongoose = require('mongoose');
 var config = require('./config/config');
 var bodyParser = require('body-parser');//we installed via npm
+const cookieParser = require('cookie-parser');  // Import cookie-parser
 var https = require('https');
 var http = require('http');
 var fs = require('fs');
+var path = require('path');
 var flash = require('express-flash');
-var session = require('express-session')
 var swaggerJSDoc = require('swagger-jsdoc');
 
 //controllers
@@ -27,6 +31,7 @@ var widgetSubscriptionController = require('./controllers/widgetSubscriptionCont
 var twilioController = require('./controllers/twilioController');
 var keywordController = require('./controllers/keywordController');
 var campaignController = require('./controllers/campaignController');
+var authRouter = require('./routes/auth2');
 
 //middleware
 var geoip = require('./middleware/geoip');
@@ -36,12 +41,17 @@ var cronScheduler = require('./helpers/cronScheduler')
 
 //======= Swagger Setup =================================//
 var hostString = '';
+/*
 if (process.env.NODE_ENV == 'production')
 	//hostString = 'https://textraction.herokuapp.com';
   hostString= 'localhost:80';
 else
+
 	hostString= 'localhost:8080';//AWS needs 80
 
+hostString= 'localhost:3000';
+console.log('process.env.NODE_ENV = '+process.env.NODE_ENV);
+//
 // swagger definition
 var swaggerDefinition = {
   info: {
@@ -51,7 +61,7 @@ var swaggerDefinition = {
   },
 
   host: hostString,
-  basePath: '/',
+  basePath: '/swagger',
 };
 
 // options for the swagger docs
@@ -70,11 +80,11 @@ app.get('/swagger.json', function(req, res) {
   res.setHeader('Content-Type', 'application/json');
   res.send(swaggerSpec);
 });
-
+*/
 //======= End Swagger Setup ========================================//
 
 //authentication
-var passport	= require('passport');
+
 //var morgan      = require('morgan');
 
 //log
@@ -82,21 +92,79 @@ var logger = require('./logging/logModule');
 logger.info('Jay Swaminarayan, First log ! :D ');
 logger.info('<<<>>>> config.TWILIO_ACCOUNT_SID='+config.TWILIO_ACCOUNT_SID);
 
+app.use(bodyParser.json());
+app.use(cookieParser());  // Use cookie-parser middleware
+
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
 //app.use('/assets', express.static(__dirname + '/public'));
-app.use(express.static(__dirname + "/")); //Note: usually it will be /public --> thats where all ui will be hosted
+//app.use(express.static(__dirname + "/")); //Note: usually it will be /public --> thats where all ui will be hosted
+app.use(express.static(path.join(__dirname, 'public')));
 
-//adding jade - does not affect angulat/static file serving
-app.set('view engine', 'pug');
+//imp - do it before other middleware code
+app.use(session({
+  secret: 'JaySwaminarayanJaySwaminarayan', // replace with your own secret
+  resave: false,
+  saveUninitialized: true,
+  cookie: { 
+    secure: false,  // set to true if your application is served over HTTPS
+    maxAge: 60000
+   } 
+}));
 
-//setup flash message usage. Flash needs sessions
-//app.use(express.cookieParser('keyboard cat'));
-//app.use(session({ cookie: { maxAge: 60000 }}));
+app.use('/', authRouter);
+
+//app.use(csrf());
+/*
+app.use(passport.authenticate('session'));
+app.use(function(req, res, next) {
+  var msgs = req.session.messages || [];
+  res.locals.messages = msgs;
+  res.locals.hasMessages = !! msgs.length;
+  req.session.messages = [];
+  next();
+});
+app.use(passport.session());
+*/
+/*
+app.use(function(req, res, next) {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+*/
+//app.use('/login', authRouter);
+/*
+app.use(csrf());
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+// get our request parameters
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(function(req, res, next) {
+  var msgs = req.session.messages || [];
+  res.locals.messages = msgs;
+  res.locals.hasMessages = !! msgs.length;
+  req.session.messages = [];
+  next();
+});
+app.use(function(req, res, next) {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+*/
+//adding jade - does not affect angular/static file serving
+//app.set('view engine', 'pug');
+
 /*
 Note on flash messages: they use cookie
 -for it to work, cookie must be able to store in browser, if cookie option is secure, but connection is not https, 
 cookie will not be able to store, thus you wont see flash-messages
 Ref: https://stackoverflow.com/questions/29310650/express-flash-messages-with-passport-doesnt-work
 */
+/*
 app.use(session({
   secret: 'JaySwaminarayanJaySwaminarayan',
   resave: false,
@@ -105,22 +173,21 @@ app.use(session({
             maxAge: 60000 
           }
 }))
-app.use(flash());
+*/
+//app.use(flash());
 
 //NOTE: to run app: nodemon app.js
-var port = config.port;
-
+var port = 3000;// ktemp override config.port;
+logger.info('<<<<>>>> server running on port = '+port);
 
 // DB
 mongoose.Promise = global.Promise; // Ref: https://stackoverflow.com/questions/38138445/node3341-deprecationwarning-mongoose-mpromise
-mongoose.connect(config.getDbConnectionString());
+//mongoose.connect(config.getDbConnectionString());
 console.log("############### => getDbConnectionString = "+config.getDbConnectionString());
 // pass passport for configuration
 require('./config/passport')(passport);
 
-// get our request parameters
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+
 
 // express log
 //app.use(morgan('dev'));
@@ -144,43 +211,6 @@ logger.info('Jay Swaminarayan, First log ! :D ');
 logger.info('creating controllers');
 logger.info('env var KRUTIK='+config.KRUTIK);
 
-//
-var validator = require('validator');
-var d = '2017-04-21T06:54:34.995Z';
-var now = new Date();
-var d2 = Date.parse(d);
-console.log('==='+now.toString());
-console.log('==='+d2.toString());//This prints mili-seconds
-
-console.log('==='+now.toISOString());
-
-var d3 = new Date(d);//can create date object from ISO string as well
-console.log('@@@ '+d3.toISOString());//this gives back same ISO string
-
-var date1 = new Date('2017-04-21T00:00:00.005Z');
-var date2 = new Date('2017-04-21T00:00:01.000Z');
-var diff = date2.getTime() - date1.getTime();
-console.log("@@@@@@@@ date2 - date1 ="+ diff);
-
-cronScheduler.testSchedule();
-cronScheduler.scheduleMessageJob();
-/*
-if(!validator.isISO8601(now.toString())){
-    console.log("################# not valid");
-}
-else{
-  console.log("################# is valid!");
-}
-*/
-/*
-if(now > d2){ //This comaprision works !
-  console.log("################# now bigger");
-}else{
-  console.log("################# d2 bigger - wrong");
-}
-*/
-//
-//
 //Controllers
 
 
@@ -212,3 +242,29 @@ https.createServer({
 */
 
 
+
+//const mongoose = require('mongoose');
+
+// Connection URL
+const url = config.getDbConnectionString();
+
+mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('<<<>>>Connected successfully to MongoDB server'))
+  .catch(err => console.error('<<<>>>Failed to connect to MongoDB server:', err));
+
+// Routes
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+
+// Serve AngularJS app
+app.get('/app', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/logout', (req, res) => {
+  //send html to clear localstorage
+
+  res.clearCookie('token', { httpOnly: true, secure: false, sameSite: 'Strict' });
+  res.redirect('/login');
+});

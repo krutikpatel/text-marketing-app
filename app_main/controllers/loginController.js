@@ -1,5 +1,6 @@
 var bodyParser = require('body-parser');//we installed via npm
 var jwtHelper = require('../helpers/jwthelper');
+var passport	= require('passport');
 
 var Users = require('../models/userModel');
 var config = require('../config/config');
@@ -15,6 +16,69 @@ module.exports = function(app){
 
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true}));
+
+    /*
+    auth redirect link controller
+    after successful oauth login, this controller is called by user browser, as it is mentioned in the google oauth2 button : data-login_uri
+    */
+    app.post('/login', passport.authenticate('google', { scope: ['profile', 'email'] }), async function(req, res) {
+    //app.post('/login', async function(req, res) {
+        
+        logger.info('[loginController][post:/login] req.body: '+JSON.stringify(req.body));
+        var token = jwtHelper.createJwtToken(req.body);
+        
+        res.status(200).send({
+            success: true,
+            message: 'login successful',
+            token: 'JWT ' + token
+        });
+        //res.redirect('/smsapp/memberinfo'); could not do it
+/*        
+        try{        
+            const user = await Users.findOne({email: req.body.email});
+            //const user = userObject.toObject();
+            //throw { err: 'dfsd', code : 400};
+
+            if (!user) {
+                res.status(401).send({
+                    success: false,
+                    message: 'Authentication failed. User not found.'
+                });
+            } else {
+                // check if password matches
+                const isMatch = await user.comparePassword(req.body.password);
+                    if (isMatch) {
+                        
+                        // if user is found and password is right create a token
+                        var token = jwtHelper.createJwtToken(user.toObject());
+                        
+                        //check trial expiry
+                        userBalanceHelper.checkTrialPeriodExpiry(user);
+
+                        logger.info('[loginController][post:/login] login successful for: '+ user.email);
+                        // return the information including token as JSON
+                        res.status(200).send({
+                            success: true,
+                            message: 'login successful',
+                            token: 'JWT ' + token
+                        });
+                    } else {
+                        res.status(401).send({
+                            success: false,
+                            message: 'Authentication failed. Wrong password.'
+                        });
+                    }
+            }
+        } catch(err){
+            logger.error('[loginController][post:/login] error finding user error from DB = '+err + ' \nStack = '+err.stack);
+            res.status(500).send({
+                success: false, 
+                message: 'There was problem with getting info from db'
+            });
+        }
+*/
+    });
+
 
     /**
      * @swagger
@@ -64,7 +128,7 @@ module.exports = function(app){
      *         description: json of error. { success - boolean, message - string}
     */
     //1
-    app.post('/login', async function(req, res) {
+    app.post('/loginLegacy', async function(req, res) {
         
         logger.info('[loginController][post:/login] email: '+req.body.email);
         
